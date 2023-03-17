@@ -1,0 +1,1627 @@
+alias announce_timer = player.timer[0]
+alias ability_timer = player.timer[1]
+declare player.ability_timer = 2
+alias current_phase = global.number[0]
+declare current_phase with network priority high
+alias phase_timer = global.timer[0]
+declare phase_timer = 60
+declare player.announce_timer = 5
+alias player_phase = player.number[0]
+alias announced = player.number[3]
+alias finished = player.number[2]
+alias selected_type = player.number[1]
+alias build_phase = 1
+alias race_phase = 2
+alias is_true = 1
+alias is_false = 0
+alias first_place = global.player[0]
+alias temp_object1 = global.object[0]
+alias temp_object2 = global.object[1]
+alias power_core = player.object[1]
+alias attached_object = player.object[0]
+alias temp_int1 = global.number[1]
+
+
+alias announced_last_man = global.number[3]
+alias announced_bomb = global.number[7]
+alias detonation_announced = 2
+alias armed_announced = 1
+alias bomb_not_announced = 0
+
+--stats
+alias objects_on_map = global.number[4]
+alias total_purchases = global.number[5]
+alias total_races = global.number[6]
+declare global.number[4] with network priority high
+declare global.number[5] with network priority high
+declare global.number[6] with network priority high
+
+alias money = player.number[4]
+alias spent = player.number[7]
+declare player.money with network priority high = script_option[4]
+alias bonus_points = player.number[6]
+alias price = object.number[2]
+declare object.price with network priority high
+alias discounted_item = global.object[2]
+declare discounted_item with network priority high
+
+alias chaos_index = global.number[8]
+declare chaos_index with network priority high
+alias chaos_timer = global.timer[3]
+alias chaos_modifier = global.number[9]
+
+--Placables type index
+alias flat_block = 1
+alias barrier = 2
+alias golf_hole = 3
+alias wall = 4
+alias light = 5
+alias kill_ball_alias = 6
+alias pelican_alias = 7
+
+alias special_fx = 9
+alias grid_alias = 10
+alias phantom_alias = 11
+
+alias fire = 21
+alias fire_team = team[1]
+alias lift = 22
+alias lift_team = team[2]
+alias low_grav_zone = 23
+alias low_grav_team = team[3]
+alias speed_zone = 24
+alias speed_team = team[4]
+alias chaos_zone = 25
+alias chaos_team = team[5]
+
+alias sabre_alias = 8
+alias sabre_team = team[4]
+alias ball_spawner = 41
+alias ball_spawner_team = team[1]
+alias die_spawner = 42
+alias die_spawner_team = team[2]
+alias evade_spawner = 43
+alias evade_spawner_team = team[3]
+alias mine_spawner = 44
+alias mine_spawner_team = team[4]
+alias vehicle_spawner = 45
+alias vehicle_spawner_team = team[5]
+alias time_bomb_spawner = 46
+alias time_bomb_spawner_team = team[6]
+alias armor_lock_spawner = 47
+alias armor_lock_spawner_team = team[7]
+alias monitor_spawner = 48
+alias monitor_spawner_team = team[1]
+alias shade_spawner = 49
+alias shade_spawner_team = team[2]
+alias skull_spawner = 50
+alias skull_spawner_team = team[3]
+alias flag_spawner = 51
+alias flag_spawner_team = team[4]
+alias jetpack_spawner = 52
+alias jetpack_spawner_team = team[5]
+alias concussion_rifle_spawner = 53
+alias concussion_rifle_spawner_team = team[6]
+alias fusion_coil_spawner = 54
+alias fusion_coil_spawner_team = team[7]
+alias sprint_spawner = 55
+alias sprint_spawner_team = team[1]
+alias grav_hammer_spawner = 56
+alias grav_hammer_spawner_team = team[2]
+
+
+
+
+alias delete_small = 61
+alias delete_medium = 62
+alias delete_large = 63
+alias rotate_objects = 64
+alias move_objects = 65
+alias delete_half = 66
+
+alias move_right = 70
+alias move_left = 71
+alias move_up = 72
+alias move_down = 73
+
+--prices
+alias flat_block_price = 0
+alias barrier_price = 1
+alias golf_hole_price = 3
+alias ball_spawner_price = 2
+alias die_spawner_price = 2
+alias evade_spawner_price = 8
+alias sprint_spawner_price = 8
+alias mine_spawner_price = 4
+alias light_price = 5
+alias delete_small_price = 500
+alias vehicle_spawner_price = 14
+alias fire_price = 6
+alias fusion_coil_spawner_price = 4
+alias time_bomb_spawner_price = 20
+alias wall_price = 8
+alias delete_medium_price = 600
+alias armor_lock_spawner_price = 12
+alias monitor_spawner_price = 17
+alias lift_price = 30
+alias kill_ball_price = 15
+alias rotate_objects_price = 85
+alias grav_hammer_spawner_price = 25
+alias jetpack_spawner_price = 60
+alias skull_spawner_price = 300
+alias skull_price_division = 8
+alias pelican_price = 60
+alias phantom_price = 70
+alias concussion_rifle_spawner_price = 60
+alias delete_large_price = 750
+alias flag_spawner_price = 200
+alias flag_price_division = 4
+alias sabre_price = 300
+alias special_fx_price = 9999
+alias delete_half_price = 1200
+alias grid_price = 600
+alias move_price = 90
+alias zone_price = 85
+alias chaos_price = 130
+
+
+
+on init: do
+	current_phase = build_phase
+	phase_timer = script_option[0]
+	phase_timer += 20
+	for each object with label "placed" do
+		temp_int1 = rand(2)
+		if temp_int1 == 0 then
+			current_object.delete()
+		end
+		temp_object1 = no_object
+		temp_int1 = rand(100)
+		if current_object.is_of_type(block_1x1_flat) or current_object.is_of_type(breakpoint_bomb_door) or current_object.is_of_type(golf_cup) or current_object.is_of_type(heavy_barrier) then
+			if temp_int1 < 90 then
+				temp_object1 = current_object.place_at_me(block_1x1_flat, "placed", never_garbage_collect, 0, 0, 0, none)
+			end
+			if temp_int1 == 90 then
+				temp_object1 = current_object.place_at_me(breakpoint_bomb_door, "placed", never_garbage_collect, 0, 0, 0, none)
+			end
+			if temp_int1 > 91 and temp_int1 < 95 then
+				temp_object1 = current_object.place_at_me(golf_cup, "placed", never_garbage_collect, 0, 0, 0, none)
+			end
+			if temp_int1 >= 95 then
+				temp_object1 = current_object.place_at_me(heavy_barrier, "placed", never_garbage_collect, 0, 0, 0, none)
+			end
+		end
+		if current_object.is_of_type(grid) then
+			temp_object1 = current_object.place_at_me(grid, "placed", never_garbage_collect, 0, 0, 0, none)
+		end
+		temp_object1.attach_to(current_object, 0, 0, 0, relative)
+		temp_object1.detach()
+		temp_object1.copy_rotation_from(current_object, true)
+		current_object.delete()
+	end
+end
+
+--move game to next phase
+if phase_timer.is_zero() then 
+	alias previous_phase = temp_int1
+	previous_phase = current_phase
+	if previous_phase == build_phase then 
+		current_phase = race_phase
+		phase_timer = script_option[1]
+		announced_last_man = is_false
+		announced_bomb = bomb_not_announced
+		total_races += 1
+		for each object with label "no_place_zone" do
+			temp_object1 = current_object
+			for each object with label "placed" do
+				if temp_object1.shape_contains(current_object) then 
+					current_object.delete()
+				end
+			end
+			for each object with label "spawner1" do
+				if temp_object1.shape_contains(current_object) then 
+					current_object.delete()
+				end
+			end
+			for each object with label "spawner2" do
+				if temp_object1.shape_contains(current_object) then 
+					current_object.delete()
+				end
+			end
+			for each object with label "spawner3" do
+				if temp_object1.shape_contains(current_object) then 
+					current_object.delete()
+				end
+			end
+			for each object with label "special" do
+				if temp_object1.shape_contains(current_object) then 
+					current_object.delete()
+				end
+			end
+		end
+		--spawns objects from spawners
+		for each object with label "spawner1" do
+			temp_int1 = rand(100)
+			if current_object.team == ball_spawner_team then
+				if temp_int1 > 50 then
+					temp_object1 = current_object.place_at_me(golf_ball, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 <= 50 then
+					temp_object1 = current_object.place_at_me(soccer_ball, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+			end
+			if current_object.team == die_spawner_team then
+				temp_object1 = current_object.place_at_me(dice, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == evade_spawner_team then
+				temp_object1 = current_object.place_at_me(evade, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == mine_spawner_team then
+				temp_object1 = current_object.place_at_me(landmine, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == vehicle_spawner_team then
+				if temp_int1 < 10 then
+					temp_object1 = current_object.place_at_me(mongoose, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 10 and temp_int1 < 20 then
+					temp_object1 = current_object.place_at_me(warthog, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 20 and temp_int1 < 30 then
+					temp_object1 = current_object.place_at_me(ghost, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 30 and temp_int1 < 40 then
+					temp_object1 = current_object.place_at_me(forklift, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 40 and temp_int1 < 50 then
+					temp_object1 = current_object.place_at_me(electric_cart, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 50 and temp_int1 < 60 then
+					temp_object1 = current_object.place_at_me(shade, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 60 and temp_int1 < 70 then
+					temp_object1 = current_object.place_at_me(semi_truck, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 70 and temp_int1 < 80 then
+					temp_object1 = current_object.place_at_me(pickup_truck, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 80 and temp_int1 < 85 then
+					temp_object1 = current_object.place_at_me(revenant, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 85 and temp_int1 < 90 then
+					temp_object1 = current_object.place_at_me(wraith, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 90 and temp_int1 < 95 then
+					temp_object1 = current_object.place_at_me(scorpion, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 95 and temp_int1 < 100 then
+					temp_object1 = current_object.place_at_me(oni_van, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+			end
+			if current_object.team == time_bomb_spawner_team then
+				if temp_int1 < 50 then
+					temp_object1 = current_object.place_at_me(bomb, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+				if temp_int1 >= 50 then
+					temp_object1 = current_object.place_at_me(covenant_bomb, "garbage", never_garbage_collect, 0, 0, 0, none)
+				end
+			end
+			if current_object.team == armor_lock_spawner_team then
+				temp_object1 = current_object.place_at_me(armor_lock, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			temp_object1.attach_to(current_object, 0, 0, 0, relative)
+			temp_object1.detach()
+			temp_object1.copy_rotation_from(current_object, true)
+		end
+		for each object with label "spawner2" do
+			if current_object.team == monitor_spawner_team then
+				temp_object1 = current_object.place_at_me(monitor, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == shade_spawner_team then
+				temp_object1 = current_object.place_at_me(shade, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == skull_spawner_team then
+				temp_object1 = current_object.place_at_me(skull, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == flag_spawner_team then
+				temp_object1 = current_object.place_at_me(flag, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == jetpack_spawner_team then
+				temp_object1 = current_object.place_at_me(jetpack, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == concussion_rifle_spawner_team then
+				temp_object1 = current_object.place_at_me(concussion_rifle, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == fusion_coil_spawner_team then
+				temp_object1 = current_object.place_at_me(fusion_coil, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			temp_object1.attach_to(current_object, 0, 0, 0, relative)
+			temp_object1.detach()
+			temp_object1.copy_rotation_from(current_object, true)
+		end
+		for each object with label "spawner3" do
+			if current_object.team == sprint_spawner_team then
+				temp_object1 = current_object.place_at_me(sprint, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == grav_hammer_spawner_team then
+				temp_object1 = current_object.place_at_me(gravity_hammer, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			if current_object.team == sabre_team then
+				temp_object1 = current_object.place_at_me(sabre, "garbage", never_garbage_collect, 0, 0, 0, none)
+			end
+			temp_object1.attach_to(current_object, 0, 0, 0, relative)
+			temp_object1.detach()
+			temp_object1.copy_rotation_from(current_object, true)
+		end
+	end
+	if previous_phase == race_phase then 
+		current_phase = build_phase
+		phase_timer = script_option[0]
+		discounted_item = get_random_object("forge_zone", discounted_item)
+		alias not_all_finished = temp_int1
+		not_all_finished = is_false
+		for each player do
+			if current_player.finished == is_false then 
+				not_all_finished = is_true
+			end
+		end
+		if not_all_finished == is_true then 
+			for each player do
+				temp_int1 = 0
+				temp_int1 += 5
+				if current_player.finished == is_true then 
+					current_player.score += script_option[2]
+					current_player.score += current_player.bonus_points
+					temp_int1 += script_option[2]
+					temp_int1 += current_player.bonus_points
+				end
+				if current_player == first_place then 
+					current_player.score += script_option[3]
+					temp_int1 += script_option[3]
+					game.show_message_to(all_players, none, "%p was first and gets bonus $", current_player)
+				end
+				current_player.money += temp_int1
+				game.show_message_to(current_player, none, "You got $%n", temp_int1)
+			end
+		end
+		first_place = no_player
+		if not_all_finished == is_false then 
+			game.show_message_to(all_players, none, "Too easy, no points awarded")
+			for each player do
+				send_incident(killjoy, current_player, no_player)
+			end
+		end
+		for each object with label "garbage" do
+			current_object.delete()
+		end
+		for each player do
+			current_player.finished = is_false
+			current_player.bonus_points = 0
+		end
+	end
+end
+
+--catch up player phase to current_phase and do related actions
+for each player do
+    current_player.announce_timer.set_rate(-100%)
+    if current_player.announce_timer.is_zero() and current_player.announced != is_true then 
+       current_player.announced = is_true
+       game.show_message_to(current_player, none, "Created by Sofasleeper5")
+       send_incident(race_game_start, current_player, no_player)
+    end
+
+    if current_player.player_phase != current_phase and current_player.biped != no_object then 
+		current_player.player_phase = current_phase
+		current_player.biped.set_waypoint_icon(none)
+		current_player.biped.set_waypoint_priority(normal)
+		current_player.biped.set_waypoint_text("")
+	    if current_phase == build_phase then 
+			temp_object1 = get_random_object("forge_start", no_object)
+			temp_object2 = temp_object1.place_at_me(monitor, "monitor_garbage", never_garbage_collect, 0, 0, 0, none)
+			temp_object1 = current_player.biped
+			current_player.set_biped(temp_object2)
+			temp_object1.delete()
+        end
+		if current_phase == race_phase then 
+			script_widget[1].set_visibility(current_player, is_false)
+			if current_player.selected_type != 0 then 
+				alias in_place_area = temp_int1
+				in_place_area = is_true
+				for each object with label "no_place_zone" do
+					if current_object.shape_contains(current_player.biped) then 
+						in_place_area = is_false
+					end
+				end
+				if current_player.selected_type < 60 and in_place_area == is_false then
+					current_player.spent = 0
+				end
+				temp_object2 = no_object
+				if in_place_area == is_true then 
+					if current_player.selected_type == flat_block then 
+						temp_object1 = current_player.biped.place_at_me(block_1x1_flat, "placed", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == barrier then 
+						temp_object1 = current_player.biped.place_at_me(heavy_barrier, "placed", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == golf_hole then 
+						temp_object1 = current_player.biped.place_at_me(golf_cup, "placed", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == wall then 
+						temp_object1 = current_player.biped.place_at_me(breakpoint_bomb_door, "placed", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == light then 
+						temp_int1 = rand(9)
+						if temp_int1 == 0 then 
+							temp_object1 = current_player.biped.place_at_me(light_red, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 1 then 
+							temp_object1 = current_player.biped.place_at_me(light_blue, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 2 then 
+							temp_object1 = current_player.biped.place_at_me(light_green, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 3 then 
+							temp_object1 = current_player.biped.place_at_me(light_orange, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 4 then 
+							temp_object1 = current_player.biped.place_at_me(light_purple, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 5 then 
+							temp_object1 = current_player.biped.place_at_me(light_yellow, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 6 then 
+							temp_object1 = current_player.biped.place_at_me(light_white, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 7 then 
+							temp_object1 = current_player.biped.place_at_me(light_red_flashing, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 8 then 
+							temp_object1 = current_player.biped.place_at_me(light_yellow_flashing, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+					end
+					if current_player.selected_type == kill_ball_alias then 
+						temp_object1 = current_player.biped.place_at_me(kill_ball, "placed", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == pelican_alias then 
+						temp_object1 = current_player.biped.place_at_me(pelican_scenery, "placed", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == sabre_alias then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner3", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = sabre_team
+						temp_object1.set_waypoint_text("sabre spawn")
+						temp_object2 = current_player.biped.place_at_me(sabre, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == special_fx then
+						temp_int1 = rand(3)
+						if temp_int1 == 0 then
+							temp_object1 = current_player.biped.place_at_me(fx_colorblind, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 1 then
+							temp_object1 = current_player.biped.place_at_me(fx_gloomy, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+						if temp_int1 == 2 then
+							temp_object1 = current_player.biped.place_at_me(fx_juicy, "placed", never_garbage_collect, 0, 0, 0, none)
+						end
+					end
+					if current_player.selected_type == grid_alias then 
+						temp_object1 = current_player.biped.place_at_me(grid, "placed", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == phantom_alias then 
+						temp_object1 = current_player.biped.place_at_me(phantom_scenery, "placed", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == fire then 
+						temp_object1 = current_player.biped.place_at_me(particle_emitter_fire, "special", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = fire_team
+					end
+					if current_player.selected_type == lift then 
+						temp_object1 = current_player.biped.place_at_me(capture_plate, "special", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = lift_team
+					end
+                    if current_player.selected_type == low_grav_zone then
+                        temp_object1 = current_player.biped.place_at_me(flag_stand, "special", never_garbage_collect, 0, 0, 0, none)
+                        temp_object1.team = low_grav_team
+                        temp_object1.set_waypoint_text("low G")
+                    end
+                    if current_player.selected_type == speed_zone then
+                        temp_object1 = current_player.biped.place_at_me(flag_stand, "special", never_garbage_collect, 0, 0, 0, none)
+                        temp_object1.team = speed_team
+                        temp_object1.set_waypoint_text("speed")
+                    end
+                    if current_player.selected_type == chaos_zone then
+                        temp_object1 = current_player.biped.place_at_me(flag_stand, "special", never_garbage_collect, 0, 0, 0, none)
+                        temp_object1.team = chaos_team
+                        temp_object1.set_waypoint_text("chaos")
+                    end
+					if current_player.selected_type == ball_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner1", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = ball_spawner_team
+						temp_object1.set_waypoint_text("ball spawn")
+						temp_object2 = current_player.biped.place_at_me(golf_ball, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == die_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner1", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = die_spawner_team
+						temp_object1.set_waypoint_text("die spawn")
+						temp_object2 = current_player.biped.place_at_me(dice, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == mine_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner1", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = mine_spawner_team
+						temp_object1.set_waypoint_text("mine spawn")
+						temp_object2 = current_player.biped.place_at_me(landmine, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == evade_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner1", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = evade_spawner_team
+						temp_object1.set_waypoint_text("evade spawn")
+						temp_object2 = current_player.biped.place_at_me(evade, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == vehicle_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner1", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = vehicle_spawner_team
+						temp_object1.set_waypoint_text("vehicle spawn")
+						temp_object2 = current_player.biped.place_at_me(mongoose, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == time_bomb_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner1", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = time_bomb_spawner_team
+						temp_object1.set_waypoint_text("timebomb spawn")
+						temp_object2 = current_player.biped.place_at_me(bomb, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == armor_lock_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner1", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = armor_lock_spawner_team
+						temp_object1.set_waypoint_text("armor lock spawn")
+						temp_object2 = current_player.biped.place_at_me(armor_lock, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == monitor_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner2", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = monitor_spawner_team
+						temp_object1.set_waypoint_text("monitor spawn")
+						temp_object2 = current_player.biped.place_at_me(monitor, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == skull_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner2", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = skull_spawner_team
+						temp_object1.set_waypoint_text("skull spawn")
+						temp_object2 = current_player.biped.place_at_me(skull, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == flag_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner2", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = flag_spawner_team
+						temp_object1.set_waypoint_text("flag spawn")
+						temp_object2 = current_player.biped.place_at_me(flag, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == jetpack_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner2", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = jetpack_spawner_team
+						temp_object1.set_waypoint_text("jetpack spawn")
+						temp_object2 = current_player.biped.place_at_me(jetpack, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == concussion_rifle_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner2", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = concussion_rifle_spawner_team
+						temp_object1.set_waypoint_text("ConcussionSpawn")
+						temp_object2 = current_player.biped.place_at_me(concussion_rifle, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == fusion_coil_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner2", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = fusion_coil_spawner_team
+						temp_object1.set_waypoint_text("coil spawn")
+						temp_object2 = current_player.biped.place_at_me(fusion_coil, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == sprint_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner3", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = sprint_spawner_team
+						temp_object2 = current_player.biped.place_at_me(sprint, "garbage", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.set_waypoint_text("sprint spawn")
+					end
+					if current_player.selected_type == grav_hammer_spawner then 
+						temp_object1 = current_player.biped.place_at_me(hill_marker, "spawner3", never_garbage_collect, 0, 0, 0, none)
+						temp_object1.team = grav_hammer_spawner_team
+						temp_object1.set_waypoint_text("hammer spawn")
+						temp_object2 = current_player.biped.place_at_me(gravity_hammer, "garbage", never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type > 0 and current_player.selected_type < 61 and current_player.selected_type != lift then 
+						temp_object1.attach_to(current_player.biped, 0, 0, 0, relative)
+						temp_object1.detach()
+						temp_object1.copy_rotation_from(current_player.attached_object, true)
+					end
+					if temp_object2 != no_object then 
+						temp_object2.attach_to(current_player.biped, 0, 0, 0, relative)
+						temp_object2.detach()
+						temp_object2.copy_rotation_from(current_player.attached_object, true)
+					end
+				end
+				if current_player.selected_type >=61  and current_player.selected_type <= 63 then 
+					for each object with label "placed" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.delete()
+						end
+					end
+					for each object with label "spawner1" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.delete()
+						end
+					end
+					for each object with label "spawner2" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.delete()
+						end
+					end
+					for each object with label "spawner3" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.delete()
+						end
+					end
+					for each object with label "special" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.delete()
+						end
+					end
+				end
+				if current_player.selected_type == rotate_objects then 
+					for each object with label "placed" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.copy_rotation_from(current_player.biped, true)
+						end
+					end
+					for each object with label "spawner1" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.copy_rotation_from(current_player.biped, true)
+						end
+					end
+					for each object with label "spawner2" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.copy_rotation_from(current_player.biped, true)
+						end
+					end
+					for each object with label "spawner3" do
+						if current_player.attached_object.shape_contains(current_object) then 
+							current_object.copy_rotation_from(current_player.biped, true)
+						end
+					end
+				end
+				if current_player.selected_type == delete_half then 
+					game.show_message_to(all_players, none, "%p deleted 1/2 of everything", current_player)
+					for each object with label "placed" do
+						temp_int1 = rand(2)
+						if temp_int1 == 0 then
+							current_object.delete()
+						end
+					end
+					for each object with label "spawner1" do
+						temp_int1 = rand(2)
+						if temp_int1 == 0 then
+							current_object.delete()
+						end
+					end
+					for each object with label "spawner2" do
+						temp_int1 = rand(2)
+						if temp_int1 == 0 then
+							current_object.delete()
+						end
+					end
+					for each object with label "spawner3" do
+						temp_int1 = rand(2)
+						if temp_int1 == 0 then
+							current_object.delete()
+						end
+					end
+					for each object with label "special" do
+						temp_int1 = rand(2)
+						if temp_int1 == 0 then
+							current_object.delete()
+						end
+					end
+				end
+            end
+			current_player.biped.delete()
+			current_player.selected_type = 0
+			current_player.attached_object = no_object
+			current_player.power_core.delete()
+			current_player.money -= current_player.spent
+			current_player.spent = 0
+		end
+	end
+end
+
+--zone to select an object with
+for each object with label "forge_zone" do
+	current_object.set_waypoint_visibility(no_one)
+	current_object.set_shape_visibility(no_one)
+	if current_phase == build_phase then 
+		current_object.set_waypoint_visibility(everyone)
+		current_object.set_waypoint_priority(normal)
+		current_object.set_waypoint_range(0, 9)
+		if current_object.spawn_sequence == flat_block then 
+			current_object.price = flat_block_price
+			current_object.set_waypoint_text("1x1 block $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == barrier then 
+			current_object.price = barrier_price
+			current_object.set_waypoint_text("barrier $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == golf_hole then 
+			current_object.price = golf_hole_price
+			current_object.set_waypoint_text("tin cup $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == ball_spawner then 
+			current_object.price = ball_spawner_price
+			current_object.set_waypoint_text("ball  $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == evade_spawner then 
+			current_object.price = evade_spawner_price
+			current_object.set_waypoint_text("evade  $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == sprint_spawner then 
+			current_object.price = sprint_spawner_price
+			current_object.set_waypoint_text("sprint $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == light then 
+			current_object.price = light_price
+			current_object.set_waypoint_text("light $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == delete_small then 
+			current_object.price = delete_small_price
+			current_object.price -= objects_on_map
+			current_object.set_waypoint_text("delete s $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == vehicle_spawner then 
+			current_object.price = vehicle_spawner_price
+			current_object.set_waypoint_text("vehicle $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == fire then 
+			current_object.price = fire_price
+			current_object.set_waypoint_text("fire $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == fusion_coil_spawner then 
+			current_object.price = fusion_coil_spawner_price
+			current_object.set_waypoint_text("coil $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == time_bomb_spawner then 
+			current_object.price = time_bomb_spawner_price
+			current_object.set_waypoint_text("timebomb $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == wall then 
+			current_object.price = wall_price
+			current_object.set_waypoint_text("wall $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == delete_medium then 
+			current_object.price = delete_medium_price
+			current_object.price -= objects_on_map
+			current_object.set_waypoint_text("delete m $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == armor_lock_spawner then 
+			current_object.price = armor_lock_spawner_price
+			current_object.set_waypoint_text("armorlock $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == monitor_spawner then 
+			current_object.price = monitor_spawner_price
+			current_object.set_waypoint_text("monitor $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == lift then 
+			current_object.price = lift_price
+			current_object.set_waypoint_text("lift $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == kill_ball_alias then 
+			current_object.price = kill_ball_price
+			current_object.set_waypoint_text("kill ball $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == rotate_objects then 
+			current_object.price = rotate_objects_price
+			current_object.set_waypoint_text("rotate $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == grav_hammer_spawner then 
+			current_object.price = grav_hammer_spawner_price
+			current_object.set_waypoint_text("hammer $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == jetpack_spawner then 
+			current_object.price = jetpack_spawner_price
+			current_object.set_waypoint_text("jetpack $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == skull_spawner then 
+			current_object.price = skull_spawner_price
+			current_object.price += objects_on_map
+			current_object.price /= skull_price_division
+			current_object.set_waypoint_text("skull $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == flag_spawner then 
+			current_object.price = flag_spawner_price
+			current_object.price += objects_on_map
+			current_object.price /= flag_price_division
+			current_object.set_waypoint_text("flag $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == pelican_alias then 
+			current_object.price = pelican_price
+			current_object.set_waypoint_text("pelican $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == phantom_alias then 
+			current_object.price = phantom_price
+			current_object.set_waypoint_text("phantom $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == vehicle_spawner then 
+			current_object.price = vehicle_spawner_price
+			current_object.set_waypoint_text("vehicle $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == concussion_rifle_spawner then 
+			current_object.price = concussion_rifle_spawner_price
+			current_object.set_waypoint_text("concussion $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == delete_large then 
+			current_object.price = delete_large_price
+			current_object.price -= objects_on_map
+			current_object.set_waypoint_text("delete l $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == sabre_alias then 
+			current_object.price = sabre_price
+			current_object.set_waypoint_text("sabre $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == die_spawner then 
+			current_object.price = die_spawner_price
+			current_object.set_waypoint_text("die $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == special_fx then 
+			current_object.price = special_fx_price
+			current_object.set_waypoint_text("specialfx $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == delete_half then 
+			current_object.price = delete_half_price
+			current_object.price -= objects_on_map
+			current_object.set_waypoint_text("delete 1/2$%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == grid_alias then 
+			current_object.price = grid_price
+			current_object.set_waypoint_text("grid $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == mine_spawner then 
+			current_object.price = mine_spawner_price
+			current_object.set_waypoint_text("mine $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == move_right then 
+			current_object.price = move_price
+			current_object.set_waypoint_text("move R $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == move_left then 
+			current_object.price = move_price
+			current_object.set_waypoint_text("move L $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == move_down then 
+			current_object.price = move_price
+			current_object.set_waypoint_text("move D $%n", hud_target_object.price)
+		end
+		if current_object.spawn_sequence == move_up then 
+			current_object.price = move_price
+			current_object.set_waypoint_text("move U $%n", hud_target_object.price)
+		end
+        if current_object.spawn_sequence == low_grav_zone then
+            current_object.price = zone_price
+            current_object.set_waypoint_text("low G zn $%n", hud_target_object.price)
+        end
+        if current_object.spawn_sequence == speed_zone then
+            current_object.price = zone_price
+            current_object.set_waypoint_text("speed zn $%n", hud_target_object.price)
+        end
+        if current_object.spawn_sequence == chaos_zone then
+            current_object.price = chaos_price
+            current_object.set_waypoint_text("chaos zn $%n", hud_target_object.price)
+        end
+		if current_object.price < 0 then
+			current_object.price = 0
+		end
+	end
+end
+if current_phase == build_phase then
+	discounted_item.set_waypoint_priority(blink)
+	discounted_item.set_waypoint_range(0, 30)
+	discounted_item.price /= 2
+	for each object with label "forge_zone" do
+		for each player do
+			if current_object.price <= current_player.money then 
+				current_object.set_shape_visibility(mod_player, current_player, 1)
+				if current_object.shape_contains(current_player.biped) then
+					total_purchases += 1
+					--current_player.money -= current_object.price
+					current_player.spent = current_object.price
+					current_player.selected_type = current_object.spawn_sequence
+					temp_object1 = get_random_object("forge_start_2", no_object)
+					temp_object2 = temp_object1.place_at_me(monitor, "monitor_garbage", never_garbage_collect, 0, 0, 0, none)
+					temp_object1 = current_player.biped
+					current_player.set_biped(temp_object2)
+					temp_object1.delete()
+					if current_player.selected_type == flat_block then 
+					   current_player.attached_object = current_player.biped.place_at_me(block_1x1_flat, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == barrier then 
+						current_player.attached_object = current_player.biped.place_at_me(heavy_barrier, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == golf_hole then 
+					   current_player.attached_object = current_player.biped.place_at_me(golf_cup, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == wall then 
+					   current_player.attached_object = current_player.biped.place_at_me(breakpoint_bomb_door, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == light then 
+					   current_player.attached_object = current_player.biped.place_at_me(light_white, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == kill_ball_alias then 
+					   current_player.attached_object = current_player.biped.place_at_me(kill_ball, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == pelican_alias then 
+					   current_player.attached_object = current_player.biped.place_at_me(pelican_scenery, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == sabre_alias then 
+					   current_player.attached_object = current_player.biped.place_at_me(sabre, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == grid_alias then 
+					   current_player.attached_object = current_player.biped.place_at_me(grid, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == phantom_alias then 
+					   current_player.attached_object = current_player.biped.place_at_me(phantom_scenery, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == fire then 
+					   current_player.attached_object = current_player.biped.place_at_me(particle_emitter_fire, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == lift then 
+						current_player.attached_object = current_player.biped.place_at_me(capture_plate, none, never_garbage_collect, 0, 0, 0, none)
+						current_player.attached_object.set_shape(cylinder, 4, 8, 1)
+					end
+					if current_player.selected_type == ball_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(golf_ball, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == die_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(dice, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == evade_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(evade, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == mine_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(landmine, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == vehicle_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(mongoose, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == time_bomb_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(bomb, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == armor_lock_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(armor_lock, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == shade_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(shade, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == skull_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(skull, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == flag_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(flag, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == jetpack_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(jetpack, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == concussion_rifle_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(concussion_rifle, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == fusion_coil_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(fusion_coil, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == sprint_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(sprint, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == grav_hammer_spawner then 
+					   current_player.attached_object = current_player.biped.place_at_me(gravity_hammer, none, never_garbage_collect, 0, 0, 0, none)
+					end
+					if current_player.selected_type == delete_small then 
+						current_player.attached_object = current_player.biped.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						current_player.attached_object.set_shape(cylinder, 7, 7, 7)
+					end
+					if current_player.selected_type == delete_medium then 
+						current_player.attached_object = current_player.biped.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						current_player.attached_object.set_shape(cylinder, 17, 17, 17)
+					end
+					if current_player.selected_type == delete_large then 
+						current_player.attached_object = current_player.biped.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						current_player.attached_object.set_shape(cylinder, 35, 35, 35)
+					end
+					if current_player.selected_type == rotate_objects then 
+						current_player.attached_object = current_player.biped.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						current_player.attached_object.set_shape(cylinder, 15, 15, 15)
+					end
+					if current_player.selected_type == move_right or current_player.selected_type == move_left or current_player.selected_type == move_down or current_player.selected_type == move_up then
+						current_player.attached_object = current_player.biped.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						current_player.attached_object.set_shape(cylinder, 15, 15, 15)
+					end
+                    if current_player.selected_type == speed_zone or current_player.selected_type == low_grav_zone or current_player.selected_type == chaos_zone then
+                        current_player.attached_object = current_player.biped.place_at_me(flag_stand, none, never_garbage_collect, 0, 0, 0, none)
+                        current_player.attached_object.set_shape(box, 30, 30, 15, 15)
+                    end
+                    current_player.attached_object.attach_to(current_player.biped, 0, 0, 0, relative)
+				end
+			end	
+		end
+	end
+end
+
+for each player do
+    if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then 
+		current_player.selected_type = 0
+		current_player.attached_object.delete()
+		current_player.attached_object = no_object
+	end
+	for each object with label "goal" do
+		if current_player.player_phase == race_phase and current_phase == race_phase and current_object.shape_contains(current_player.biped) and current_player.finished != is_true  and phase_timer < script_option[1] then 
+			current_player.finished = is_true
+			game.show_message_to(all_players, none, "%p finished", current_player)
+			if first_place == no_player then 
+				first_place = current_player
+				game.play_sound_for(all_players, announce_vip_new, true)
+			end
+			if first_place != current_player then
+				send_incident(checkpoint_reached, current_player, no_player)
+			end
+		end
+	end
+	if current_player.player_phase == build_phase then 
+		temp_object1 = no_object
+		temp_object1 = current_player.try_get_weapon(primary)
+		if not temp_object1.is_of_type(unsc_data_core) then 
+			current_player.power_core.delete()
+			current_player.power_core = current_player.biped.place_at_me(unsc_data_core, "garbage", never_garbage_collect, 0, 0, 0, none)
+			current_player.add_weapon(current_player.power_core)
+		end
+		current_player.apply_traits(script_traits[0])
+		if current_player.biped.is_of_type(monitor) then
+			current_player.biped.set_invincibility(1)
+		end
+	end
+
+	script_widget[3].set_visibility(current_player, false)
+	if current_phase == build_phase then 
+		for each player do
+			script_widget[1].set_visibility(current_player, is_false)
+			for each object with label "no_place_zone" do
+				if current_object.shape_contains(current_player.biped) then 
+					script_widget[1].set_text("Can't place objects here!")
+					script_widget[1].set_visibility(current_player, true)
+				end
+			end
+			temp_object1 = current_player.attached_object
+			temp_object1.set_shape_visibility(no_one)
+			if current_player.selected_type == delete_small or current_player.selected_type == delete_medium or current_player.selected_type == delete_large or 
+            current_player.selected_type == rotate_objects or 
+            current_player.selected_type == move_right or current_player.selected_type == move_left or current_player.selected_type == move_down or current_player.selected_type == move_up or 
+            current_player.selected_type == speed_zone or current_player.selected_type == low_grav_zone or current_player.selected_type == chaos_zone or
+            current_player.selected_type == lift then
+				script_widget[3].set_text("Objects with their center in the zone will be affected")
+				script_widget[3].set_visibility(current_player, true)
+				temp_object1 = current_player.attached_object
+				temp_object1.set_shape_visibility(everyone)
+			end
+			if current_player.selected_type == rotate_objects then
+				for each object with label "placed" do
+					if current_player.attached_object.shape_contains(current_object) then 
+						current_object.copy_rotation_from(current_player.biped, true)
+					end
+				end
+				for each object with label "spawner1" do
+					if current_player.attached_object.shape_contains(current_object) then 
+						current_object.copy_rotation_from(current_player.biped, true)
+					end
+				end
+				for each object with label "spawner2" do
+					if current_player.attached_object.shape_contains(current_object) then 
+						current_object.copy_rotation_from(current_player.biped, true)
+					end
+				end
+				for each object with label "spawner3" do
+					if current_player.attached_object.shape_contains(current_object) then 
+						current_object.copy_rotation_from(current_player.biped, true)
+					end
+				end
+				for each object with label "special" do
+					if current_player.attached_object.shape_contains(current_object) then 
+						current_object.copy_rotation_from(current_player.biped, true)
+					end
+				end
+			end
+			if current_player.selected_type == move_right then
+				function move_current_right()
+					if current_player.attached_object.shape_contains(current_object) then
+						temp_object1 = current_object.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						temp_object1.attach_to(current_object, 0, 0, 0, absolute)
+						temp_object1.detach()
+						temp_object2 = get_random_object("axis_reference", no_object)
+						temp_object1.copy_rotation_from(temp_object2, true)
+						current_object.attach_to(temp_object1, 0, -1, 0, absolute)
+						current_object.detach()
+						temp_object1.delete()
+					end
+				end
+				for each object with label "placed" do
+					move_current_right()
+				end
+				for each object with label "spawner1" do
+					move_current_right()
+				end
+				for each object with label "spawner2" do
+					move_current_right()
+				end
+				for each object with label "spawner3" do
+					move_current_right()
+				end
+				for each object with label "special" do
+					move_current_right()
+				end
+			end
+			if current_player.selected_type == move_left then
+				function move_current_left()
+					if current_player.attached_object.shape_contains(current_object) then
+						temp_object1 = current_object.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						temp_object1.attach_to(current_object, 0, 0, 0, absolute)
+						temp_object1.detach()
+						temp_object2 = get_random_object("axis_reference", no_object)
+						temp_object1.copy_rotation_from(temp_object2, true)
+						current_object.attach_to(temp_object1, 0, 1, 0, absolute)
+						current_object.detach()
+						temp_object1.delete()
+					end
+				end
+				for each object with label "placed" do
+					move_current_left()
+				end
+				for each object with label "spawner1" do
+					move_current_left()
+				end
+				for each object with label "spawner2" do
+					move_current_left()
+				end
+				for each object with label "spawner3" do
+					move_current_left()
+				end
+				for each object with label "special" do
+					move_current_left()
+				end
+			end
+			if current_player.selected_type == move_down then
+				function move_current_down()
+					if current_player.attached_object.shape_contains(current_object) then
+						temp_object1 = current_object.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						temp_object1.attach_to(current_object, 0, 0, 0, absolute)
+						temp_object1.detach()
+						temp_object2 = get_random_object("axis_reference", no_object)
+						temp_object1.copy_rotation_from(temp_object2, true)
+						current_object.attach_to(temp_object1, 0, 0, -1, absolute)
+						current_object.detach()
+						temp_object1.delete()
+					end
+				end
+				for each object with label "placed" do
+					move_current_down()
+				end
+				for each object with label "spawner1" do
+					move_current_down()
+				end
+				for each object with label "spawner2" do
+					move_current_down()
+				end
+				for each object with label "spawner3" do
+					move_current_down()
+				end
+				for each object with label "special" do
+					move_current_down()
+				end
+			end
+			if current_player.selected_type == move_up then
+				function move_current_up()
+					if current_player.attached_object.shape_contains(current_object) then
+						temp_object1 = current_object.place_at_me(hill_marker, none, never_garbage_collect, 0, 0, 0, none)
+						temp_object1.attach_to(current_object, 0, 0, 0, absolute)
+						temp_object1.detach()
+						temp_object2 = get_random_object("axis_reference", no_object)
+						temp_object1.copy_rotation_from(temp_object2, true)
+						current_object.attach_to(temp_object1, 0, 0, 1, absolute)
+						current_object.detach()
+						temp_object1.delete()
+					end
+				end
+				for each object with label "placed" do
+					move_current_up()
+				end
+				for each object with label "spawner1" do
+					move_current_up()
+				end
+				for each object with label "spawner2" do
+					move_current_up()
+				end
+				for each object with label "spawner3" do
+					move_current_up()
+				end
+				for each object with label "special" do
+					move_current_up()
+				end
+			end
+		end
+	end
+end
+
+if current_phase == race_phase then 
+	for each object with label "goal" do
+		current_object.set_shape_visibility(everyone)
+		current_object.set_waypoint_visibility(everyone)
+		current_object.set_waypoint_priority(normal)
+		current_object.set_waypoint_icon(vip)
+		current_object.set_waypoint_range(0, 70)
+	end
+	for each object with label "vote_zone" do
+		alias finished_or_skipping_count = temp_int1
+		alias player_count = global.number[2]
+		finished_or_skipping_count = 0
+		player_count = 0
+		for each player do
+			player_count += 1
+			if current_object.shape_contains(current_player.biped) or current_player.finished == is_true then 
+				finished_or_skipping_count += 1
+			end
+		end
+		if finished_or_skipping_count == player_count then 
+			phase_timer = 0
+		end
+		player_count -= 1
+		if finished_or_skipping_count == player_count and announced_last_man != is_true then
+			game.play_sound_for(all_players, announce_infection_last_man, false)
+			announced_last_man = is_true
+		end
+		
+		current_object.set_shape_visibility(everyone)
+		current_object.set_waypoint_visibility(everyone)
+		current_object.set_waypoint_priority(normal)
+		current_object.set_waypoint_text("vote to skip")
+		current_object.set_waypoint_range(0, 10)
+	end
+end
+
+for each object with label "no_place_zone" do
+	current_object.set_shape_visibility(no_one)
+	if current_phase == build_phase then
+		current_object.set_shape_visibility(everyone)
+	end
+end
+
+for each player do
+	script_widget[0].set_visibility(current_player, true)
+	script_widget[2].set_value_text("$%n", hud_player.money)
+	script_widget[2].set_visibility(current_player, true)
+	script_widget[0].set_visibility(current_player, true)
+	script_widget[0].set_text("Race to the end: %s", phase_timer)
+	script_widget[0].set_meter_params(timer, phase_timer)
+	if current_player.biped != no_object then
+		current_player.team = team[0]
+	end
+	if current_player.player_phase != build_phase and current_player.player_phase != race_phase then
+		current_player.set_round_card_title("Switch between forging and racing! \nCheck Sofasleeper5's file share for modded gametypes")
+	end
+	if current_player.player_phase == race_phase then
+		current_player.set_round_card_title("Race\n\nTotal Races: %n", total_races)
+	end
+	if current_player.player_phase == build_phase then
+		current_player.set_round_card_title("Build\nPlaced objects on map: %n \nTotal purchases: %n", objects_on_map, total_purchases)
+		script_widget[0].set_text("Place an object: %s\nObject is placed when timer is 0:00", phase_timer)
+	end
+	
+end
+
+if game.round_time_limit > 0 and game.round_timer.is_zero() then 
+   game.end_round()
+end
+
+on local: do
+	for each object with label "special" do
+		if current_object.team == lift_team then
+			current_object.set_waypoint_range(0, 4)
+			current_object.set_waypoint_visibility(everyone)
+			current_object.set_waypoint_text("Lift")
+			current_object.set_shape(cylinder, 4, 8, 1)
+			current_object.set_shape_visibility(everyone)
+			current_object.timer[0].set_rate(-200%)
+			if current_object.timer[0].is_zero() then
+				for each player do
+					if current_object.shape_contains(current_player.biped) and not current_player.biped.is_of_type(monitor) then
+						current_player.biped.push_upward()
+						current_player.biped.push_upward()
+						current_player.biped.push_upward()
+						current_player.biped.push_upward()
+						current_player.biped.push_upward()
+						current_object.timer[0] = 1
+						game.play_sound_for(current_player, boneyard_generator_power_down, true)
+					end
+				end
+				temp_object1 = current_object
+				for each object with label "garbage" do
+					if temp_object1.shape_contains(current_object) then
+						current_object.push_upward()
+						current_object.push_upward()
+						current_object.push_upward()
+						current_object.push_upward()
+						current_object.push_upward()
+						temp_object1.timer[0] = 1
+					end
+				end
+				for each object with label "placed" do
+					if current_object.is_of_type(kill_ball) then
+						if temp_object1.shape_contains(current_object) then
+							current_object.push_upward()
+							current_object.push_upward()
+							current_object.push_upward()
+							current_object.push_upward()
+							current_object.push_upward()
+							temp_object1.timer[0] = 1
+						end
+					end
+				end
+			end
+		end
+        if current_object.is_of_type(flag_stand) and current_phase == race_phase and current_object.team == chaos_team then
+            if chaos_index == 4 then
+                temp_object1 = current_object
+                for each object with label "garbage" do
+                    if temp_object1.shape_contains(current_object) then
+                        current_object.push_upward()
+                    end
+                end
+            end
+            if chaos_index == 3 then
+                temp_object1 = current_object
+                for each object with label "garbage" do
+                    if temp_object1.shape_contains(current_object) then
+                        current_object.set_scale(chaos_modifier)
+                    end
+                end
+            end
+            for each player do
+                if current_object.team == chaos_team and chaos_index < 3 and current_phase == race_phase and current_object.shape_contains(current_player.biped) then
+                    if chaos_index == 0 then
+                        current_player.biped.push_upward()
+                    end
+                    if chaos_index == 1 then
+                        current_player.biped.set_scale(chaos_modifier)
+                    end
+                    if chaos_index == 2 then
+                        temp_object1 = current_player.get_weapon(primary)
+                        temp_object1.set_scale(chaos_modifier)
+                    end
+                end
+            end
+        end
+	end
+end
+
+do
+	
+
+    phase_timer.set_rate(-100%)
+    chaos_timer.set_rate(-100%)
+	objects_on_map = 0
+    if chaos_timer.is_zero() then
+        chaos_timer = 5
+        chaos_index = rand(23)
+		chaos_modifier = rand(200)
+		if chaos_modifier > 100 then
+			chaos_modifier *= 3
+		end
+    end
+
+
+	for each object with label "spawner1" do
+		current_object.set_waypoint_range(0, 7)
+		current_object.set_waypoint_visibility(everyone)
+		if current_phase == race_phase then
+			current_object.set_waypoint_visibility(no_one)
+		end
+		objects_on_map += 1
+	end
+	for each object with label "spawner2" do
+		current_object.set_waypoint_range(0, 7)
+		current_object.set_waypoint_visibility(everyone)
+		if current_phase == race_phase then
+			current_object.set_waypoint_visibility(no_one)
+		end
+		objects_on_map += 1
+	end
+	for each object with label "spawner3" do
+		current_object.set_waypoint_range(0, 7)
+		current_object.set_waypoint_visibility(everyone)
+		if current_phase == race_phase then
+			current_object.set_waypoint_visibility(no_one)
+		end
+		objects_on_map += 1
+	end
+	for each object with label "placed" do
+		if current_object.is_of_type(phantom_scenery) then
+			current_object.set_invincibility(1)
+		end
+		objects_on_map += 1
+	end
+	for each object with label "special" do
+		objects_on_map += 1
+        if current_object.team == fire_team then
+            current_object.set_shape(cylinder, 3, 3, 2)
+            for each player do
+                if current_object.shape_contains(current_player.biped) then
+                    temp_int1 = current_player.biped.shields
+                    if temp_int1 == 0 then
+                        current_player.biped.health -= 2
+                    end 
+                    current_player.biped.shields -= 4
+                end
+            end
+        end
+        if current_object.is_of_type(flag_stand) and current_phase == race_phase then
+            current_object.set_shape_visibility(everyone)
+            current_object.set_shape(box, 30, 30, 15, 15)
+            current_object.set_waypoint_visibility(everyone)
+            current_object.set_waypoint_range(0, 10)
+            if current_object.team == speed_team then
+                current_object.set_waypoint_text("speed zone")
+            end
+            if current_object.team == low_grav_team then
+                current_object.set_waypoint_text("low G zone")
+            end
+            if current_object.team == chaos_team then
+                current_object.set_waypoint_text("chaos zone")
+            end
+            for each player do
+                if current_object.shape_contains(current_player.biped) then
+                    if current_object.team == speed_team then
+                        current_player.apply_traits(script_traits[1])
+                    end
+                    if current_object.team == low_grav_team then
+                        current_player.apply_traits(script_traits[2])
+                    end
+                    if current_object.team == chaos_team then
+						set_scenario_interpolator_state(1, 0)
+						if chaos_index == 5 then
+							set_scenario_interpolator_state(1, 1)
+                            if current_player.attached_object == no_object then
+								current_player.attached_object = current_player.biped.place_at_me(sound_emitter_alarm_1, "garbage", never_garbage_collect, 0, 0, 0, none)
+								current_player.attached_object.attach_to(current_player.biped, 0, 0, 0, relative)
+							end
+                        end
+						if chaos_index == 6 then
+                            current_player.biped.set_waypoint_icon(speaker)
+							current_player.biped.set_waypoint_priority(high)
+							current_player.biped.set_waypoint_text("Bully Me")
+                        end
+                        if chaos_index == 7 then
+                            current_player.apply_traits(script_traits[1])
+                        end
+                        if chaos_index == 8 then
+                            current_player.apply_traits(script_traits[2])
+                        end
+                        if chaos_index == 9 then
+                            current_player.apply_traits(script_traits[3])
+                        end
+                        if chaos_index == 10 then
+                            current_player.apply_traits(script_traits[4])
+                        end
+                        if chaos_index == 11 then
+                            current_player.apply_traits(script_traits[5])
+                        end
+                        if chaos_index == 12 then
+                            current_player.apply_traits(script_traits[6])
+                        end
+                        if chaos_index == 13 then
+                            current_player.apply_traits(script_traits[7])
+                        end
+                        if chaos_index == 14 then
+                            current_player.apply_traits(script_traits[8])
+                        end
+                        if chaos_index == 15 then
+                            current_player.apply_traits(script_traits[9])
+                        end
+                        if chaos_index == 16 then
+                            current_player.frag_grenades += 1
+                        end
+                        if chaos_index == 17 then
+                            current_player.plasma_grenades += 1
+                        end
+                        if chaos_index == 18 then
+                            temp_object1 = current_player.biped.place_at_me(monitor, "garbage", never_garbage_collect, -2, 0, 0, none)
+                            temp_object1.kill(false)
+                        end
+                        if chaos_index == 19 then
+                            current_player.biped.remove_weapon(primary, false)
+                        end
+                        if chaos_index == 20 and not current_player.biped.is_of_type(elite) then
+                            temp_object1 = current_player.biped.place_at_me(elite, "garbage", never_garbage_collect, 0, 0, 0, minor)
+                            temp_object2 = current_player.biped
+                            current_player.set_biped(temp_object1)
+                            temp_object2.delete()
+                        end
+                        if chaos_index == 21 then
+                            temp_object1 = current_player.biped.place_at_me(monitor, "garbage", never_garbage_collect, 0, 0, 2, none)
+                            temp_object1.kill(false)
+                        end
+                        if chaos_index == 22 and current_player.player_phase == race_phase then
+                            temp_object1 = current_player.try_get_weapon(primary)
+                            temp_object2 = current_player.try_get_weapon(secondary)
+                            if not temp_object1.is_of_type(rocket_launcher) and not temp_object2.is_of_type(rocket_launcher) then
+                                temp_object1 = current_player.biped.place_at_me(rocket_launcher, "garbage", never_garbage_collect, 0, 0, 0, minor)
+                                current_player.add_weapon(temp_object1)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+	end
+end
+
+
+if phase_timer == 30 then
+	for each object with label "garbage" do
+		if current_object.is_of_type(bomb) or current_object.is_of_type(covenant_bomb) then
+			current_object.kill(false)
+			if announced_bomb != detonation_announced then
+				announced_bomb = detonation_announced
+				game.play_sound_for(all_players, announce_assault_detonated, true)
+				temp_object1 = get_random_object("monitor_garbage", no_object)
+				temp_object1.delete()
+				for each object with label "placed" do
+					current_object.copy_rotation_from(current_object, true)
+				end
+			end
+			
+		end
+	end
+end
+
+
+if phase_timer <= 35 then
+	for each object with label "garbage" do
+		if current_object.is_of_type(bomb) or current_object.is_of_type(covenant_bomb) then
+			current_object.set_waypoint_icon(bomb)
+			current_object.set_waypoint_range(0, 10)
+			current_object.set_waypoint_priority(high)
+			current_object.set_waypoint_visibility(everyone)
+			current_object.set_waypoint_text("About to blow!")
+			if announced_bomb == bomb_not_announced then
+				announced_bomb = armed_announced
+				game.play_sound_for(all_players, announce_assault_armed, true)
+			end
+		end
+	end
+end
+			
+			
+for each player do
+	current_player.ability_timer.set_rate(-300%)
+	temp_object1 = current_player.get_weapon(primary)
+	if temp_object1.is_of_type(skull) then
+		current_player.bonus_points += 5
+		temp_object1.delete()
+		game.show_message_to(current_player, none, "Plus $5 if you finish!")
+		game.play_sound_for(current_player, announce_oddball_taken, true)
+	end
+	if temp_object1.is_of_type(flag) then
+		current_player.bonus_points += 10
+		temp_object1.delete()
+		game.show_message_to(current_player, none, "Plus $10 if you finish!")
+		game.play_sound_for(current_player, announce_ctf_taken, true)
+	end
+	temp_object1 = current_player.get_armor_ability()
+	if temp_object1.is_in_use() then
+		if temp_object1.is_of_type(jetpack) then
+			temp_int1 = current_player.biped.shields
+			if temp_int1 == 0 then
+				current_player.biped.health -= 1
+			end 
+			current_player.biped.shields -= 3
+		end
+		if temp_object1.is_of_type(armor_lock) and current_player.ability_timer.is_zero() then
+			temp_object2 = current_player.biped.place_at_me(dice, "garbage", never_garbage_collect, 0, 0, 0, none)
+			temp_object2.attach_to(current_player.biped, 2, 0, 0, relative)
+			temp_object2.detach()
+			current_player.ability_timer.reset()
+		end
+	end
+end
+		
